@@ -4,7 +4,6 @@ export interface Chat {
 }
 
 export interface Message {
-  chat_id: number,
   id: number,
   sender_id: number,
   content: string

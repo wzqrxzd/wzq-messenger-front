@@ -3,6 +3,7 @@
   import { reactive } from "vue";
   import axios from 'axios';
   import { useAuthStore } from '@/stores/auth';
+  import { useRouter } from 'vue-router'
   import type { Token } from 'typescript';
 
   defineOptions({
@@ -12,6 +13,8 @@
   const authStore = useAuthStore();
 
   const user = reactive<User>({username: "", password: ""});
+
+  const router = useRouter()
 
   const register = function(user: User) {
     axios.post("http://57.129.41.155:8080/register", user).then(res => {
@@ -26,6 +29,7 @@
       authStore.token = res.data.token;
 
       Object.assign(user, {username: "", password: ""});
+      router.push({name: "chat.index"})
       console.log(authStore.token); 
     });
   }

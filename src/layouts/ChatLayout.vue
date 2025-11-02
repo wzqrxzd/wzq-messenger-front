@@ -40,7 +40,7 @@
           </div>
         </div>
       </aside>
-      <article class="bg-zinc-800 w-3/4 p-4">
+      <article class="bg-zinc-800 w-3/4">
         <slot />
       </article>
     </section>
