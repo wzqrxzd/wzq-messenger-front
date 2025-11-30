@@ -4,53 +4,26 @@
   import { useRoute } from 'vue-router'
   import { watch, computed, onMounted, ref } from 'vue';
   import { useChatStore } from '@/stores/chat';
-  import axios from 'axios';
   import type { Message } from '@/types/chat';
+  import { useServerStore } from '@/stores/serverStore';
+
+  onMounted(()=>{
+    serverStore.getMessages(chatId.value);
+  });
 
   const ws = useWsStore();
   const chatStore = useChatStore();
   const authStore = useAuthStore();
+
+  const serverStore = useServerStore();
   const route = useRoute()
-  const chatId = computed(() => Number(route.params.id));
 
   const inputMessage = ref<string>();
+  const messagesContainer = ref<HTMLElement | null>(null)
 
-  onMounted(()=>{
-    getMessages(chatId.value);
-  });
+  const chatId = computed(() => Number(route.params.id));
 
-  watch(chatId, (newId) => {
-    getMessages(newId);
-  });
-
-  const getMessages = function(chatId: number) {
-     axios.get(`http://57.129.41.155:8080/chat/${chatId}/messages`,
-    {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-    }}).then(res => {
-      console.log(res.data);
-      chatStore.messages = res.data;
-    })
-  }
-
-  const sendMessage = function() {
-    axios.post("http://57.129.41.155:8080/send_message",
-    {
-      chat_id: chatId.value,
-      content: inputMessage.value
-    }, 
-    {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-    }
-    });
-    inputMessage.value = "";
-    console.log(`Bearer ${authStore.token}`
-);
-  }
-
-  const mergedMessages = computed(() => {
+  const mergedMessages = computed<Message[]>(() => {
     const wsMessages = ws.getMessages(chatId.value);
     const chatMessages = chatStore.messages;
 
@@ -58,22 +31,44 @@
       wsMsg => !chatMessages.some(chatMsg => chatMsg.message_id === wsMsg.message_id)
     );
 
-    return [...chatMessages, ...wsOnly];
+    const merged = [...chatMessages, ...wsOnly];
+    
+    return merged;
   });
 
+  const scrollToBottom = function() {
+    const el = messagesContainer.value;
+    if (el)
+    {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    }
+  }
+
+  watch(mergedMessages, () => {
+    setTimeout(scrollToBottom, 0);
+  }, { deep: true });
+  
+  watch(chatId, (newId) => {
+    serverStore.getMessages(newId);
+  });
 
 </script>
 
 <template>
   <div class="flex flex-col h-screen text-white">
-    <div class="flex-1 overflow-y-auto pt-4 pl-4 pb-24">
-      <div v-for="msg in mergedMessages" :key="msg.message_id" class="mb-4">
-        <span class="border border-gray-600 p-1" >{{msg.sender_id}}: {{msg.content}}</span>
-      </div>
+    <div ref="messagesContainer" class="flex-1 overflow-y-auto p-4">
+      <div v-for="msg in mergedMessages" :key="msg.message_id" :class="['flex mb-4', authStore.userId==msg.sender_id ? 'justify-end' : 'justify-start']">
+        <span v-if="authStore.userId==msg.sender_id" class="border border-gray-700 bg-zinc-700 rounded-xl text-zinc-200 p-2" >{{msg.content}}</span>
+        <span v-else class="border border-gray-600 bg-zinc-700 rounded-xl text-zinc-200 p-2" >{{msg.sender_name}}: {{msg.content}}</span> </div>
     </div>
-    <div class="flex gap-2 fixed w-full bottom-0 p-4 bg-zinc-900">
+
+    <div class="flex gap-2 sticky w-full bottom-0 justify-center pb-4 pr-4 pl-4">
       <input v-model="inputMessage" class="p-4 w-1/2 bg-zinc-700 rounded-3xl text-left text-zinc-200 placeholder-zinc-400" type="text" placeholder="text"> </input>
-      <button @click="sendMessage" class="p-4 w-1/10 h-full bg-zinc-700 rounded-3xl text-zinc-400 hover:bg-zinc-600 active:bg-zinc-500">Send</button>
+      <button @click="serverStore.sendMessage(chatId, inputMessage!), inputMessage=''" class="p-4 h-full bg-zinc-700 rounded-3xl text-zinc-400 hover:bg-zinc-600 active:bg-zinc-500">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+        </svg>
+      </button>
     </div>
   </div>
 </template>

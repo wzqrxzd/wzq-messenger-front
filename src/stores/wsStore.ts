@@ -1,6 +1,7 @@
-import type { Message } from "@/types/chat";
+import type { Message, Chat } from "@/types/chat";
 import { defineStore } from "pinia";
 import { reactive, ref } from "vue";
+import { useChatStore } from "./chat";
 
 interface WsMessage {
   type: string;
@@ -22,8 +23,12 @@ export const useWsStore = defineStore("ws", () => {
 
     socket.value.onmessage = (event: MessageEvent) => { 
       const data: WsMessage = JSON.parse(event.data);
+      console.log(data);
       if (data.type==="new_message") {
         addMessageToChat(data);
+      } else if (data.type==="new_chat")
+      {
+        addChat(data);
       }
     };
 
@@ -33,6 +38,12 @@ export const useWsStore = defineStore("ws", () => {
     socket.value.onerror = (err: Event) => {
     };
 
+    const addChat = function(data: WsMessage)
+    {
+      const chatStore = useChatStore();
+      chatStore.chats.push({chat_id: data.chat_id, chat_name: data.chat_name});
+    }
+
     const addMessageToChat = function(data: WsMessage)
     {
         if (!messagesByChat[data.chat_id])
@@ -41,8 +52,9 @@ export const useWsStore = defineStore("ws", () => {
         }
 
         const msg: Message = {
-          id: data.message_id,
+          message_id: data.message_id,
           sender_id: data.sender_id,
+          sender_name: data.sender_name,
           content: data.content,
         };
 

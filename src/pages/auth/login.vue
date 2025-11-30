@@ -23,9 +23,10 @@
       }
 
       authStore.token = res.data.token;
+      authStore.userId = res.data.user_id;
+      console.log(authStore.userId);
       console.log(authStore.token);
       authStore.isAuth = true;
-      console.log(authStore.token);
       router.push({name: "chat.index"})
     });
   }

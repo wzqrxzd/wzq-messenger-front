@@ -12,7 +12,7 @@
   
   const authStore = useAuthStore();
 
-  const user = reactive<User>({username: "", password: ""});
+  const user = reactive<User>({username: "", password: "", name: ""});
 
   const router = useRouter()
 
@@ -28,8 +28,7 @@
       authStore.isAuth = true;
       authStore.token = res.data.token;
 
-      Object.assign(user, {username: "", password: ""});
-      router.push({name: "chat.index"})
+      Object.assign(user, {username: "", password: "", name: ""});
       console.log(authStore.token); 
     });
   }
@@ -39,6 +38,8 @@
 <template>
   <div class="flex justify-center items-center min-h-screen bg-black">
     <div class="rounded-3xl w-1/4 bg-zinc-900 flex flex-col justify-between p-6 gap-4">
+
+      <input v-model="user.name" class="p-4 w-full bg-zinc-700 rounded-3xl text-center text-zinc-200 placeholder-zinc-400" type="text" placeholder="username"> </input>
       <input v-model="user.username" class="p-4 w-full bg-zinc-700 rounded-3xl text-center text-zinc-200 placeholder-zinc-400" type="text" placeholder="username"> </input>
       <input v-model="user.password" class="p-4 w-full bg-zinc-700 rounded-3xl text-center text-zinc-200 placeholder-zinc-400" type="password" placeholder="password"> </input>
 
