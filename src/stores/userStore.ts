@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { reactive } from "vue";
-import type { Token } from "@/types/authentication";
 import type { User } from "@/types/user";
 
 export const useUserStore = defineStore('user', () => {

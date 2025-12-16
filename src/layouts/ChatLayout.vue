@@ -1,22 +1,27 @@
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, reactive } from 'vue';
   import { useServerStore } from '@/stores/serverStore';
   import { useChatStore } from '@/stores/chat';
   import type { Chat } from '@/types/chat';
+  import type { User } from "@/types/user";
   import router from '@/router';
   import { useAuthStore } from '@/stores/auth';
+  import { useUserStore } from '@/stores/userStore';
 
   defineOptions({
     name: "ChatLayout"
   });
 
-  const serverStore = useServerStore()
+  const serverStore = useServerStore();
   const chatStore = useChatStore();
   const authStore = useAuthStore();
+  const userStore = useUserStore();
+
   const modalToggle = ref<boolean>(false);
   const createChatToggle = ref<boolean>(false);
 
   const newChatUser = ref<string>("");
+  const newUserData = reactive<User>(userStore.user);
 
   const onOpen = function(chat: Chat) {
     chatStore.currentChat = chat;
@@ -49,15 +54,15 @@
           <div class="flex flex-col p-4 gap-4 text-zinc-400">
             <div class="flex justify-between">
               <span class="p-2"> Name: </span>
-              <input v-model="authStore.userId"  type="text" placeholder="..." class="p-2 w-1/2 rounded-xl border border-zinc-600"></input>
+              <input v-model="newUserData.name"  type="text" placeholder="..." class="p-2 w-1/2 rounded-xl border border-zinc-600"></input>
             </div>
             <div class="flex justify-between">
               <span class="p-2"> Username: </span>
-              <input type="text" placeholder="..." class="p-2 w-1/2 rounded-xl border border-zinc-600"></input>
+              <input v-model="newUserData.username" type="text" placeholder="..." class="p-2 w-1/2 rounded-xl border border-zinc-600"></input>
             </div>
             <div class="flex justify-between">
-              <span class="p-2"> Password: </span>
-              <input type="text" placeholder="..." class="p-2 w-1/2 rounded-xl border border-zinc-600"></input>
+              <span class="p-2"> Description: </span>
+              <input v-model="newUserData.description" type="text" placeholder="..." class="p-2 w-1/2 rounded-xl border border-zinc-600"></input>
             </div>
             <div class="flex justify-center">
               <button class="p-4 w-full h-full bg-zinc-700 rounded-3xl bg-zinc-700 text-zinc-400 hover:bg-zinc-600 active:bg-zinc-500">
