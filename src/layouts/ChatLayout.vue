@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { onMounted, ref, reactive } from 'vue';
+  import { watch, onMounted, ref, reactive } from 'vue';
   import { useServerStore } from '@/stores/serverStore';
   import { useChatStore } from '@/stores/chat';
   import type { Chat } from '@/types/chat';
@@ -31,6 +31,16 @@
   onMounted(()=>{
     serverStore.getChats();
   });
+
+
+  watch(
+    () => userStore.user.userId,
+    (newUserId) => {
+      if (newUserId) {
+        userStore.getUserInfo(newUserId);
+      }
+    }
+  );
 </script>
 
 <template>
