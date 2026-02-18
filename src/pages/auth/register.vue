@@ -5,6 +5,7 @@
   import { useAuthStore } from '@/stores/auth';
   import { useRouter } from 'vue-router'
   import type { Token } from 'typescript';
+  import { SERVER_URL } from "@/config/serverConfig";
 
   const isFailAuth = ref<boolean>(false);
 
@@ -19,7 +20,7 @@
   const router = useRouter()
 
   const register = function(user: User) {
-    axios.post("http://57.129.41.155:8080/register", user).then(res => {
+    axios.post(`${SERVER_URL}/register`, user).then(res => {
       authStore.isAuth = true;
       authStore.token = res.data.token;
       authStore.userId = res.data.user_id;

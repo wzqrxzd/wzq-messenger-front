@@ -10,23 +10,18 @@
   const ws = useWsStore();
   const router = useRouter();
 
-  onMounted(() => {
-    console.log("init");
-    if (!authStore.isAuth)
-    {
-      router.push({name: "auth.login"})
-      return;
-    }
-
-    ws.connect(authStore.token);
-    serverStore.getUserInfo(authStore.userId);
-  })
+//  onMounted(() => {
+//    ws.connect(authStore.token);
+//    serverStore.getUserInfo(authStore.userId);
+//  })
 
 </script>
 
 <template>
-  <div class="text-white">
-    Index
+  <div class="flex justify-center items-center text-white w-full h-full">
+    <div class="text-zinc-600">
+      No currently selected chat
+    </div>
   </div>
 </template>
 

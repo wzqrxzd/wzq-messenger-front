@@ -4,6 +4,7 @@
   import axios from 'axios';
   import { useAuthStore } from '@/stores/auth';
   import type { Token } from 'typescript';
+  import { SERVER_URL } from "@/config/serverConfig";
   import { useRouter } from 'vue-router'
 
   defineOptions({
@@ -17,12 +18,16 @@
   const isFailAuth = ref<boolean>(false);
 
   const login = function(user: User) {
-    axios.post("http://57.129.41.155:8080/login", user).then(res => {
+    axios.post(`${SERVER_URL}/login`, user).then(res => {
       authStore.token = res.data.token;
       authStore.userId = res.data.user_id;
       console.log(authStore.userId);
       console.log(authStore.token);
       authStore.isAuth = true;
+
+      localStorage.setItem('token', authStore.token);
+      localStorage.setItem('userId', authStore.userId);
+
       router.push({name: "chat.index"})
     }).catch( err => {
          authStore.isAuth = false;

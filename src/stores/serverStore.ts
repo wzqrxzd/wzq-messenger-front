@@ -5,11 +5,13 @@ import { useChatStore } from '@/stores/chat';
 import { useUserStore } from "./userStore";
 import { ref } from "vue";
 
+import { SERVER_URL } from "@/config/serverConfig";
+
 export const useServerStore = defineStore('server', () => {
     function getChats() {
       const authStore = useAuthStore();
       const chatStore = useChatStore();
-      axios.get("http://57.129.41.155:8080/chats", 
+      axios.get(`${SERVER_URL}/chats`, 
         {
           headers: {
             Authorization: `Bearer ${authStore.token}`
@@ -26,11 +28,15 @@ export const useServerStore = defineStore('server', () => {
   {
     const authStore = useAuthStore();
     const chatStore = useChatStore();
-     axios.get(`http://57.129.41.155:8080/chats/${chatId}/messages`,
-    {
+    console.log(authStore.token);
+     axios.post(`${SERVER_URL}/chats/messages/get`,
+      {
+        id: chatId
+      },
+      {
       headers: {
         Authorization: `Bearer ${authStore.token}`
-    }}).then(res => {
+      }}).then(res => {
       console.log(res.data);
       chatStore.messages = res.data;
     })
@@ -39,9 +45,10 @@ export const useServerStore = defineStore('server', () => {
 
   function sendMessage(chatId: number, content: string) {
     const authStore = useAuthStore();
-    axios.post(`http://57.129.41.155:8080/chats/${chatId}/messages`,
+    axios.post(`${SERVER_URL}/chats/messages`,
     {
-      content: content
+      content: content,
+      chat_id: chatId
     }, 
     {
       headers: {
@@ -55,7 +62,7 @@ export const useServerStore = defineStore('server', () => {
   function createChat(username: string) {
     const authStore = useAuthStore();
     let id: number = 0;
-    axios.post(`http://57.129.41.155:8080/chats`,
+    axios.post(`${SERVER_URL}/chats`,
       {
         name: username,
         username: username
@@ -84,12 +91,15 @@ export const useServerStore = defineStore('server', () => {
   function getUserInfo(userId: number) {
     const authStore = useAuthStore();
     const userStore = useUserStore();
-    axios.get(`http://57.129.41.155:8080/user/${userId}`,
-    {
-      headers: {
+    axios.post(`${SERVER_URL}/user`,
+      {
+        id: Number(userId)
+      },
+      {
+        headers: {
         Authorization: `Bearer ${authStore.token}`
-    }
-    }).then(res => {
+        }
+      }).then(res => {
       console.log(res.data);
       Object.assign(userStore.user, {userId:userId, name:res.data.name, username:res.data.username, description:res.data.description});
     });

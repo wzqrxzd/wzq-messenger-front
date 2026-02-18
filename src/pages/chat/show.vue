@@ -11,6 +11,8 @@
     serverStore.getMessages(chatId.value);
   });
 
+  let loaded = false;
+
   const ws = useWsStore();
   const chatStore = useChatStore();
   const authStore = useAuthStore();
@@ -51,6 +53,22 @@
   watch(chatId, (newId) => {
     serverStore.getMessages(newId);
   });
+
+  watch(
+    () => authStore.token, () => {
+      authStore.token = localStorage.getItem('token');
+      authStore.userId = localStorage.getItem('userId');
+    }
+  )
+  watch(
+    () => authStore.token,
+    (token) => {
+      if (token && !loaded) {
+        loaded = true;
+        serverStore.getMessages(chatId.value);
+      }
+    }
+  );
 
 </script>
 

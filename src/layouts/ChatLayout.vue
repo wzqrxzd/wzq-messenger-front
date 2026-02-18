@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { watch, onMounted, ref, reactive } from 'vue';
   import { useServerStore } from '@/stores/serverStore';
+  import { useWsStore } from "@/stores/wsStore";
   import { useChatStore } from '@/stores/chat';
   import type { Chat } from '@/types/chat';
   import type { User } from "@/types/user";
@@ -16,6 +17,7 @@
   const chatStore = useChatStore();
   const authStore = useAuthStore();
   const userStore = useUserStore();
+  const ws = useWsStore();
 
   const modalToggle = ref<boolean>(false);
   const createChatToggle = ref<boolean>(false);
@@ -29,7 +31,22 @@
   }
 
   onMounted(()=>{
+    if (!authStore.isAuth)
+    {
+      if (localStorage.getItem('token') === null) {
+        router.push({name: "auth.login"})
+        return;
+      }
+
+      authStore.token = localStorage.getItem('token');
+      authStore.userId = localStorage.getItem('userId');
+      authStore.isAuth = true;
+    }
+
     serverStore.getChats();
+    ws.connect(authStore.token);
+    serverStore.getUserInfo(authStore.userId);
+
   });
 
 
@@ -76,7 +93,7 @@
             </div>
             <div class="flex justify-center">
               <button class="p-4 w-full h-full bg-zinc-700 rounded-3xl bg-zinc-700 text-zinc-400 hover:bg-zinc-600 active:bg-zinc-500">
-                Create
+                Update
               </button>
             </div>
           </div>

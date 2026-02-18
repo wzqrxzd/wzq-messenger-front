@@ -3,6 +3,8 @@ import { defineStore } from "pinia";
 import { reactive, ref } from "vue";
 import { useChatStore } from "./chat";
 
+import { SERVER_URL } from "@/config/serverConfig";
+
 interface WsMessage {
   type: string;
   [key: string]: any;
@@ -15,7 +17,7 @@ export const useWsStore = defineStore("ws", () => {
   function connect(token: string) {
     if (socket.value) socket.value.close();
 
-    socket.value = new WebSocket(`ws://zxc.sasavn.ru:8080/ws`);
+    socket.value = new WebSocket(`${SERVER_URL}/ws`);
 
     socket.value.onopen = () => {
       socket.value?.send(JSON.stringify({token}));
